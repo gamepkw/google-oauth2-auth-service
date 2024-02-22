@@ -30,6 +30,8 @@ func main() {
 		Scopes: []string{
 			viper.GetString("google.scopes-profile"),
 			viper.GetString("google.scopes-email"),
+			viper.GetString("google.scopes-openid"),
+			viper.GetString("google.scopes-calendar"),
 		},
 		Endpoint: googleOAuth.Endpoint,
 	}

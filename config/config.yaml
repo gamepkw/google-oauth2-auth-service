@@ -8,6 +8,8 @@ google:
   redirectURL: "http://localhost:3001/home"
   scopes-profile: "https://www.googleapis.com/auth/userinfo.profile"
   scopes-email: "https://www.googleapis.com/auth/userinfo.email"
+  scopes-openid: "openid"
+  scopes-calendar: "https://www.googleapis.com/auth/calendar"
 
 facebook:
   appID: "940552110936939"
