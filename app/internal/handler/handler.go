@@ -3,9 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
-	"io"
 	"net/http"
-	"net/url"
 
 	"github.com/gamepkw/google-oauth2/app/internal/helpers/pages"
 	"github.com/gamepkw/google-oauth2/app/internal/model"
@@ -34,6 +32,7 @@ func NewOAuthHandler(e *echo.Echo, auth oAuthService.OAuthService, googleOauthCo
 	//google
 	e.GET("/login-google", handler.LoginGoogle)
 	e.GET("/login-google-implicit", handler.LoginGoogleImplicit)
+	e.POST("/revoke-token-google", handler.RevokeTokenGoogle)
 	e.POST("/callback-google", handler.CallbackFromGoogle)
 	e.POST("/get-new-token", handler.GetNewAccessToken)
 
@@ -66,6 +65,21 @@ func (a *OAuthHandler) LoginGoogle(c echo.Context) error {
 	fmt.Println(authURL)
 
 	return c.JSON(http.StatusOK, authURL)
+}
+
+func (a *OAuthHandler) RevokeTokenGoogle(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	var request model.RevokeAccessTokenRequest
+	if err := c.Bind(&request); err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+	}
+
+	if err := a.oAuthService.RevokeAccessToken(ctx, request.AccessToken); err != nil {
+		return c.JSON(http.StatusBadRequest, nil)
+	}
+
+	return c.JSON(http.StatusOK, nil)
 }
 
 func (a *OAuthHandler) LoginGoogleImplicit(c echo.Context) error {
@@ -113,47 +127,11 @@ func (a *OAuthHandler) CallbackFromGoogle(c echo.Context) error {
 		return c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
 
-	code := request.AuthCode
-	logger.Log.Info(code)
-
-	fmt.Println("code", code)
-
-	if code == "" {
-		logger.Log.Warn("Code not found..")
-		return c.String(http.StatusOK, "Code Not Found to provide AccessToken..\n")
-	}
-
-	opts := []oauth2.AuthCodeOption{
-		oauth2.AccessTypeOffline,
-	}
-
-	token, err := a.googleOauthConf.Exchange(context.Background(), code, opts...)
+	token, err := a.oAuthService.ExchangeAccessTokenGoogle(context.Background(), request)
 	if err != nil {
-		logger.Log.Error("oauthConfGl.Exchange() failed with " + err.Error() + "\n")
 		return err
 	}
 
-	fmt.Println("accessToken", token)
-
-	logger.Log.Info("TOKEN>> AccessToken>> " + token.AccessToken)
-	logger.Log.Info("TOKEN>> Expiration Time>> " + token.Expiry.String())
-	logger.Log.Info("TOKEN>> RefreshToken>> " + token.RefreshToken)
-
-	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + url.QueryEscape(token.AccessToken))
-	if err != nil {
-		logger.Log.Error("Get: " + err.Error() + "\n")
-		return c.Redirect(http.StatusTemporaryRedirect, "/")
-	}
-	defer resp.Body.Close()
-
-	response, err := io.ReadAll(resp.Body)
-	if err != nil {
-		logger.Log.Error("ReadAll: " + err.Error() + "\n")
-		return c.Redirect(http.StatusTemporaryRedirect, "/")
-	}
-
-	logger.Log.Info("parseResponseBody: " + string(response) + "\n")
-	fmt.Println(string(response))
 	return c.JSON(http.StatusOK, model.CallbackGoogleResponse{AccessToken: token.AccessToken, RefreshToken: token.RefreshToken})
 }
 
@@ -172,43 +150,11 @@ func (a *OAuthHandler) CallbackFromGithub(c echo.Context) error {
 		return c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
 
-	code := request.AuthCode
-	logger.Log.Info(code)
-
-	fmt.Println("code", code)
-
-	if code == "" {
-		logger.Log.Warn("Code not found..")
-		return c.String(http.StatusOK, "Code Not Found to provide AccessToken..\n")
-	}
-
-	token, err := a.githubOauthConf.Exchange(context.Background(), code)
+	token, err := a.oAuthService.ExchangeAccessTokenGithub(context.Background(), request)
 	if err != nil {
-		logger.Log.Error("oauthConfGl.Exchange() failed with " + err.Error() + "\n")
 		return err
 	}
 
-	fmt.Println("accessToken", token)
-
-	logger.Log.Info("TOKEN>> AccessToken>> " + token.AccessToken)
-	logger.Log.Info("TOKEN>> Expiration Time>> " + token.Expiry.String())
-	logger.Log.Info("TOKEN>> RefreshToken>> " + token.RefreshToken)
-
-	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + url.QueryEscape(token.AccessToken))
-	if err != nil {
-		logger.Log.Error("Get: " + err.Error() + "\n")
-		return c.Redirect(http.StatusTemporaryRedirect, "/")
-	}
-	defer resp.Body.Close()
-
-	response, err := io.ReadAll(resp.Body)
-	if err != nil {
-		logger.Log.Error("ReadAll: " + err.Error() + "\n")
-		return c.Redirect(http.StatusTemporaryRedirect, "/")
-	}
-
-	logger.Log.Info("parseResponseBody: " + string(response) + "\n")
-	fmt.Println(string(response))
 	return c.JSON(http.StatusOK, model.CallbackGoogleResponse{AccessToken: token.AccessToken})
 }
 

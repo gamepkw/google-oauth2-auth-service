@@ -17,3 +17,7 @@ type LoginGoogleCredentialRequest struct {
 type GetNewAccessTokenRequest struct {
 	RefreshToken string `json:"refreshToken"`
 }
+
+type RevokeAccessTokenRequest struct {
+	AccessToken string `json:"accessToken"`
+}
