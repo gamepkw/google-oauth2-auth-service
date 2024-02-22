@@ -47,3 +47,4 @@ run:
 
 
 #make build && make tag && make push && make stop && make remove && make run
+#make build && make stop && make remove && make run

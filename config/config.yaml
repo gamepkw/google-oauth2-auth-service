@@ -6,7 +6,8 @@ google:
   clientID: "515592365350-fef5525j3kdk1bgoqtbrt1nl4jnjg57d.apps.googleusercontent.com"
   clientSecret: "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"
   redirectURL: "http://localhost:3001/home"
-  scopes: "https://www.googleapis.com/auth/userinfo.email"
+  scopes-profile: "https://www.googleapis.com/auth/userinfo.profile"
+  scopes-email: "https://www.googleapis.com/auth/userinfo.email"
 
 facebook:
   appID: "940552110936939"

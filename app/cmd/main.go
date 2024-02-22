@@ -27,8 +27,11 @@ func main() {
 		ClientID:     viper.GetString("google.clientID"),
 		ClientSecret: viper.GetString("google.clientSecret"),
 		RedirectURL:  viper.GetString("google.redirectURL"),
-		Scopes:       []string{viper.GetString("google.scopes")},
-		Endpoint:     googleOAuth.Endpoint,
+		Scopes: []string{
+			viper.GetString("google.scopes-profile"),
+			viper.GetString("google.scopes-email"),
+		},
+		Endpoint: googleOAuth.Endpoint,
 	}
 
 	facebookOauthConf := &oauth2.Config{
