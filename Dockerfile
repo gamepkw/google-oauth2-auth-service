@@ -2,11 +2,11 @@ FROM golang:1.21 AS builder
 
 WORKDIR /app
 
-COPY go.* .
+COPY go.* ./
 
 RUN go mod download
 
-COPY . .
+COPY . ./
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./app/cmd
 
