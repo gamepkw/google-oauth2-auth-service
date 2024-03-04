@@ -14,11 +14,11 @@ FROM alpine:latest
 
 WORKDIR /app
 
-COPY --from=builder /app/main .
+COPY --from=builder /app/main ./
 
 WORKDIR /config
 
-COPY ./config/config.yaml .
+COPY ./config/config.yaml ./
 
 WORKDIR /app
 
