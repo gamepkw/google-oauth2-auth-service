@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oauth-auth-service-deployment
+  namespace: oauth-auth-service-namespace
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: oauth-auth-service-app
+  template:
+    metadata:
+      labels:
+        app: oauth-auth-service-app
+    spec:
+      containers:
+        - name: oauth-auth-service-container
+          image: docker.io/gamepkw/oauth-auth-service-image:latest
+          ports:
+            - containerPort: 8080

@@ -22,7 +22,7 @@ COPY ./config/config.yaml .
 
 WORKDIR /app
 
-EXPOSE 9090
+EXPOSE 8080
 
 ENV TZ=Asia/Bangkok
 ENV DOCKER_ENV=docker
