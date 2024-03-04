@@ -91,7 +91,6 @@ pipeline {
         stage('Push Image') {
             steps {
                 script {
-                    sh "docker tag ${LOCAL_IMAGE_REPOSITORY}:${APP_VERSION} ${REMOTE_IMAGE_REPOSITORY}:${APP_VERSION}"
                     def imageId = sh(script: "docker images -q ${REMOTE_IMAGE_REPOSITORY}:${APP_VERSION}", returnStdout: true).trim()
                     sh "docker push ${REMOTE_IMAGE_REPOSITORY}:${APP_VERSION}"
                 }
